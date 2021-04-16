@@ -26,13 +26,41 @@ def get_data():
 class Network(nn.Module):
     def __init__(self):
         super().__init__()
-        self.hidden = nn.Linear(20, 256)
-        self.output = nn.Linear(256, 10)
+
+        self.conv1 = nn.Conv2d(
+            in_channels=1,
+            out_channels=6,
+            kernel_size=5
+        )
+
+        self.conv2 = nn.Conv2d(
+            in_channels=6,
+            out_channels=12,
+            kernel_size=5
+        )
+
+        self.hidden1 = nn.Linear(in_features=12*4*4, out_features=120)
+        self.hidden2 = nn.Linear(in_features=120, out_features=60)
+        self.output = nn.Linear(in_features=60, out_features=10)
 
     def forward(self, x):
-        return self.output(F.relu(self.hidden(x)))
+        x = F.max_pool2d(F.relu(self.conv1(x)), kernel_size=2, stride=2)
 
+        x = F.max_pool2d(F.relu(self.conv2(x)), kernel_size=2, stride=2)
+
+        # flatten tensor so it can be passed to dense hidden layer
+        x = F.relu(self.hidden1(x.reshape(-1,12*4*4)))
+
+        x = F.relu(self.hidden2(x))
+
+        # dont add softmax of output since we use CrossEntropy later
+        return self.output(x)
 
 
 if __name__ == "__main__":
     get_data()
+
+    config = dict()
+    config["lr"] = 0.05
+    config["batchsize_train"] = 64
+    config["epochs"] = 3
