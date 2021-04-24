@@ -1,24 +1,25 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
+import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import os
 from pathlib import Path
 
 
-def get_data():
+def FashionMNIST_dataset(train):
     data_path = Path("./data")
     fashion_path = data_path / "FashionMNIST"
     if not os.path.exists(fashion_path):
         os.makedirs(fashion_path)
-
     train_set = torchvision.datasets.FashionMNIST(
     root = data_path,
-    train = True,
+    train = train,
     download = True,
     transform = transforms.Compose([
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ])
 )
 
@@ -56,11 +57,44 @@ class Network(nn.Module):
         # dont add softmax of output since we use CrossEntropy later
         return self.output(x)
 
+    def train(model, dataloader, num_epochs, lr, device):
+        model.to(device)
+        
+        dataiter = iter(dataloader)
+        images, labels = dataiter.next()
+
+        optimizer = optim.SGD(model.parameters(), lr=lr)
+        loss = nn.CrossEntropyLoss()
+        scheduler = optim.lr_sceduler.StepLR(optimizer, steo_size=10, gamma=0.1)
+
+        for epoch in range(num_epochs):
+
+
+
+
+
 
 if __name__ == "__main__":
-    get_data()
-
+    # Define configuration parameters
     config = dict()
     config["lr"] = 0.05
     config["batchsize_train"] = 64
+    config["batchsize_test"] = 64
     config["epochs"] = 3
+    config["use_gpu"] = use_gpu
+
+    train_dataset = FashionMNIST_dataset(train=True)
+    test_dataset = FashionMNIST_dataset(train=False)
+
+    train_loader = torch.utils.data.DataLoader(dataaset=train_dataset, batch_size = config["batchsize_train"], shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataaset=test_dataset, batch_size = config["batchsize_test"], shuffle=False)
+
+
+
+
+
+
+
+
+
+    HEI
