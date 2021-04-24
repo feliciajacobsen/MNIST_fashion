@@ -11,6 +11,8 @@ from pathlib import Path
 def FashionMNIST_dataset(train):
     data_path = Path("./data")
     fashion_path = data_path / "FashionMNIST"
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
     if not os.path.exists(fashion_path):
         os.makedirs(fashion_path)
     train_set = torchvision.datasets.FashionMNIST(
