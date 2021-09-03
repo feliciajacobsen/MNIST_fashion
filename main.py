@@ -1,3 +1,4 @@
+# Imports
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -32,7 +33,7 @@ class Network(nn.Module):
         super().__init__()
 
         self.conv1 = nn.Conv2d(
-            in_channels=1,
+            in_channels=1, # greyscale image
             out_channels=6,
             kernel_size=5
         )
@@ -52,7 +53,7 @@ class Network(nn.Module):
 
         x = F.max_pool2d(F.relu(self.conv2(x)), kernel_size=2, stride=2)
 
-        # flatten tensor so it can be passed to dense hidden layer
+        # flatten tensor so it can be passed to dense layer
         x = F.relu(self.hidden1(x.reshape(-1,12*4*4)))
 
         x = F.relu(self.hidden2(x))
@@ -87,6 +88,7 @@ def train_eval(model, dataloader_train, dataloader_test, criterion, optimizer, e
     train_losses, test_losses = [], []
 
     for epoch in range(epochs):
+        model.train()
         losses = []
         for images, labels in trainloader:
             # Flatten Fashion-MNIST images into a 784 long vector
