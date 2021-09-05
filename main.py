@@ -63,13 +63,13 @@ def get_mean_std(loader):
     return mean, std
 
 _, train_loader = FashionMNIST_dataset(train=True)
-mean, std = get_mean_std(train_loader) # tensor([0.2860]) tensor([0.3530])
+mean, std = get_mean_std(train_loader) 
 
-#print(mean, std)
+#print(mean, std) 
 
 class Network(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(Network, self).__init__()
 
         self.conv1 = nn.Conv2d(
             in_channels=1, # greyscale image
