@@ -1,10 +1,11 @@
 # Imports
 import torch
-from torch import nn
+import torch.nn as nn
 from torch.nn import functional as F
 import torch.optim as optim
-import torchvision
+import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
 import os
 from pathlib import Path
 
@@ -16,17 +17,54 @@ def FashionMNIST_dataset(train):
         os.makedirs(data_path)
     if not os.path.exists(fashion_path):
         os.makedirs(fashion_path)
-    train_set = torchvision.datasets.FashionMNIST(
-        root = data_path,
-        train = train,
-        download = True,
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
-        ])
-    )
-    return train_set
+    
+    if train==True:
+        data_set = datasets.FashionMNIST(
+            root = data_path,
+            train = True,
+            download = True,
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+            ])
+        )
+    else:
+        data_set = datasets.FashionMNIST(
+            root = data_path,
+            train = False,
+            download = True,
+            transform = transforms.Compose([
+                transforms.ToTensor()
+                transforms.Normalize((0.286,0.286,0.286), (0.353,0.353,0.353))
+            ])
+        )
 
+    data_loader = DataLoader(dataset=data_set, batch_size=64, shuffle=True)
+
+    return data_set, data_loader
+
+
+def get_mean_std(loader):
+    """
+    This function is borrowed from:
+    https://github.com/aladdinpersson/Machine-Learning-Collection/blob/master/ML/Pytorch/Basics/pytorch_std_mean.py
+    """
+
+    channels_sum, channels_squared_sum, num_batches = 0, 0, 0
+    
+    for data, _ in loader:
+        channels_sum += torch.mean(data, dim=[0,2,3]) # don't compute mean across channel dim
+        channels_squared_sum += torch.mean(data**2, dim=[0,2,3])
+        num_batches += 1
+
+    mean = channels_sum/num_batches
+    std = (channels_squared_sum/num_batches-mean**2)**0.5
+
+    return mean, std
+
+_, train_loader = FashionMNIST_dataset(train=True)
+mean, std = get_mean_std(train_loader) # tensor([0.2860]) tensor([0.3530])
+
+#print(mean, std)
 
 class Network(nn.Module):
     def __init__(self):
@@ -58,29 +96,38 @@ class Network(nn.Module):
 
         x = F.relu(self.hidden2(x))
 
-        # dont add softmax of output since we use CrossEntropy later
+        # Dont add softmax of output since we use CrossEntropy later
         return self.output(x)
+
 
 def train(model, dataloader, criterion, optimizer, epochs, device):
     #model.to(device)
 
-    dataiter = iter(dataloader)
-    images, labels = dataiter.next()
-
     losses = []
     for epoch in range(epochs):
-        for images, labels in dataloader:
+        for batch_idx, (images, labels) in enumerate(dataloader):
+
+            # Move to same device
+            images = images.to(device=device)
+            labels = labels.to(device=device)
+
             # Flatten image
             images = images.view(images.shape[0],-1).to(device)
-            labels = labels.to(device)
-            optimizer.zero_grad()
 
-            output = model.forward(images)
+            # Forward pass
+            output = model(images)
             loss = criterion(output, labels)
+
+            # Backprop
+            optimizer.zero_grad()
             loss.backward()
+
+            # Gradient descent step
             optimizer.step()
             losses.append(loss.item())
+
     return np.mean(losses)
+
 
 def train_eval(model, dataloader_train, dataloader_test, criterion, optimizer, epochs, device):
     dataiter = iter(dataloader)
