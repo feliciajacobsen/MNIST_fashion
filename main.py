@@ -25,6 +25,7 @@ def FashionMNIST_dataset(train):
             download = True,
             transform = transforms.Compose([
                 transforms.ToTensor(),
+                transforms.Normalize((0.286,0.286,0.286), (0.353,0.353,0.353)),
             ])
         )
     else:
@@ -33,8 +34,8 @@ def FashionMNIST_dataset(train):
             train = False,
             download = True,
             transform = transforms.Compose([
-                transforms.ToTensor()
-                transforms.Normalize((0.286,0.286,0.286), (0.353,0.353,0.353))
+                transforms.ToTensor(),
+                transforms.Normalize((0.286,0.286,0.286), (0.353,0.353,0.353)),
             ])
         )
 
