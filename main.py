@@ -53,7 +53,7 @@ def get_mean_std(loader):
     channels_sum, channels_squared_sum, num_batches = 0, 0, 0
     
     for data, _ in loader:
-        channels_sum += torch.mean(data, dim=[0,2,3]) # don't compute mean across channel dim
+        channels_sum += torch.mean(data, dim=[0,2,3]) # don't sum across channel dim
         channels_squared_sum += torch.mean(data**2, dim=[0,2,3])
         num_batches += 1
 
