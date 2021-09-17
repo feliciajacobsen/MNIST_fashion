@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader
 import numpy as np
 import os
 from pathlib import Path
-from tqdm import tqdm
 
 
 def FashionMNIST_dataset(train):
