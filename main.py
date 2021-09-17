@@ -67,20 +67,24 @@ mean, std = get_mean_std(train_loader)
 
 #print(mean, std) 
 
-class Network(nn.Module):
-    def __init__(self):
+class CNNetwork(nn.Module):
+    def __init__(self, in_channels=1, out_channels, num_classes=10):
         super(Network, self).__init__()
 
+        # in_challes = 1 due to greyscale
+        
         self.conv1 = nn.Conv2d(
-            in_channels=1, # greyscale image
+            in_channels=1, 
             out_channels=6,
-            kernel_size=5
+            kernel_size=(3,3),
+            stride=(1,1),
+            padding=(1,1)
         )
 
         self.conv2 = nn.Conv2d(
             in_channels=6,
             out_channels=12,
-            kernel_size=5
+            kernel_size=(5,5)
         )
 
         self.hidden1 = nn.Linear(in_features=12*4*4, out_features=120)
