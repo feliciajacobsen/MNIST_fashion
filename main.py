@@ -6,6 +6,7 @@ import torch.optim as optim
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from torch.utils.data.sampler import WeightedRandomSampler
 import numpy as np
 import os
 from pathlib import Path
@@ -43,6 +44,7 @@ def FashionMNIST_dataset(train):
     data_loader = DataLoader(dataset=data_set, batch_size=64, shuffle=True)
 
     return data_set, data_loader
+
 
 
 def get_mean_std(loader):
@@ -176,8 +178,9 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
 
     train_model(model, train_loader, criterion, optimizer, config["epochs"], config["use_cpu"])
-    train_eval = eval_model(model, train_loader, device=config["use_cpu"])
-    test_eval = eval_model(model, test_loader, device=config["use_cpu"])
-    print(f"Accuracy on training set: {train_eval:.2f}")
-    print(f"Accuracy on test set: {test_eval:.2f}")
-
+    train_eval = eval_model(model, train_loader, config["use_cpu"])
+    test_eval = eval_model(model, test_loader, config["use_cpu"])
+    
+    print(f"Accuracy on training set: {train_eval}")
+    print(f"Accuracy on test set: {test_eval}")
+    
